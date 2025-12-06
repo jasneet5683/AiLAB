@@ -1,10 +1,18 @@
 import streamlit as st
+from streamlit_server_state import server_state, server_state_lock
+import json
+from streamlit.web import cli as stcli
+import sys
 from PyPDF2 import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
 
+# Initialize session state
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+    
 # 1. PAGE CONFIGURATION
 st.set_page_config(page_title="Customer Support AI", page_icon="🤖")
 
@@ -63,3 +71,26 @@ elif not api_key:
     st.warning("Please enter your OpenAI API Key in the sidebar to proceed.")
 else:
     st.info("Please upload a PDF document to start.")
+    
+# Create API endpoint
+if st.query_params.get("api") == "true":
+    # API mode - handle POST requests
+    import os
+    from pathlib import Path
+    
+    def get_response(prompt):
+        # Your AI logic here
+        llm = ChatOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        # Process prompt and return response
+        response = llm.invoke(prompt)
+        return response.content
+    
+    # Read POST data
+    data = st.query_params
+    if "prompt" in data:
+        response = get_response(data["prompt"])
+        st.json({"response": response})
+else:
+    # Normal Streamlit UI
+    st.title("AI Assistant")
+    # Your existing UI code
