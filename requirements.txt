@@ -6,4 +6,4 @@ langchain>=0.1.0
 langchain-openai>=0.0.5
 langchain-text-splitters>=0.0.1
 langchain-community>=0.0.1
-streamlit-server-state
+streamlit-server-state>=0.5.0
