@@ -8,7 +8,25 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+# Check if this is an API request via query parameter
+if "prompt" in st.query_params:
+    prompt = st.query_params.get("prompt")
+    
+    try:
+        llm = ChatOpenAI(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-3.5-turbo")
+        response = llm.invoke(prompt)
+        
+        # Return JSON response
+        st.json({"response": response.content, "status": "success"})
+    except Exception as e:
+        st.json({"response": str(e), "status": "error"})
+    
+    st.stop()
+    
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
